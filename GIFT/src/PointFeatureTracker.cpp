@@ -129,8 +129,19 @@ vector<Point2f> PointFeatureTracker::identifyFeatureCandidates(const Mat& image)
     }
 
     vector<Point2f> proposedFeatures;
+    if (settings.useFastFeatures){
+        std::vector<cv::KeyPoint> fastFeatures;
+        cv::FAST(imageGrey, fastFeatures, 10, true);
+        proposedFeatures.resize(fastFeatures.size());
+        std::transform(fastFeatures.begin(), fastFeatures.end(), proposedFeatures.begin(),
+            [](const cv::KeyPoint& kp){return kp.pt;}
+        );
+    } else {
     goodFeaturesToTrack(
         imageGrey, proposedFeatures, settings.maxFeatures, settings.minHarrisQuality, settings.featureDist, mask);
+    }
+
+
     vector<Point2f> newFeatures = this->removeDuplicateFeatures(proposedFeatures);
 
     return newFeatures;
@@ -200,6 +211,7 @@ void PointFeatureTracker::Settings::configure(const YAML::Node& node) {
     safeConfig(node["maxLevel"], maxLevel);
     safeConfig(node["trackedFeatureDist"], trackedFeatureDist);
     safeConfig(node["equaliseImageHistogram"], equaliseImageHistogram);
+    safeConfig(node["useFastFeatures"], useFastFeatures);
 
     ransacParams.maxIterations = 0; // No RANSAC by default
     safeConfig(node["ransacParams"], ransacParams);

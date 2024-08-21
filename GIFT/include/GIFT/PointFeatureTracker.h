@@ -42,6 +42,7 @@ class PointFeatureTracker : public GIFeatureTracker {
         int winSize = 21;
         int maxLevel = 3;
         ftype trackedFeatureDist = 0.0;
+        bool useFastFeatures = false;
 
         bool equaliseImageHistogram = false;
         // To disable RANSAC, set max iterations to 0.
